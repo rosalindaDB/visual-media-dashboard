@@ -98,6 +98,13 @@
     <span class="filter-label">Status:</span>
     <select id="statusFilter" onchange="filterAndRender()"><option value="">All Statuses</option></select>
   </div>
+  <div class="filter-group">
+    <span class="filter-label">Sort:</span>
+    <select id="sortOrder" onchange="filterAndRender()">
+      <option value="desc">Newest first</option>
+      <option value="asc">Oldest first</option>
+    </select>
+  </div>
 </div>
 
 <div class="stats" id="statsRow" style="display:none">
