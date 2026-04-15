@@ -1,2 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visual Media — Messaging Board</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f4f5f7; color: #172b4d; min-height: 100vh; }
+  .topbar { background: #fff; border-bottom: 1px solid #e0e0e0; padding: 0 32px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .topbar-left { display: flex; align-items: center; gap: 12px; }
+  .logo { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, #e63946, #f4a261); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 14px; }
+  .topbar h1 { font-size: 16px; font-weight: 600; color: #172b4d; }
+  .last-updated { font-size: 12px; color: #6b778c; }
+  .controls { padding: 20px 32px 0; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .search-wrap { position: relative; flex: 1; min-width: 240px; max-width: 360px; }
+  .search-wrap input { width: 100%; padding: 8px 12px 8px 36px; border: 1px solid #dfe1e6; border-radius: 6px; font-size: 14px; background: #fff; color: #172b4d; outline: none; }
+  .search-wrap input:focus { border-color: #4c9aff; }
+  .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #6b778c; font-size: 14px; pointer-events: none; }
+  .filter-group { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .filter-label { font-size: 12px; color: #6b778c; font-weight: 500; }
+  select { padding: 7px 12px; border: 1px solid #dfe1e6; border-radius: 6px; font-size: 13px; background: #fff; color: #172b4d; cursor: pointer; outline: none; }
+  select:focus { border-color: #4c9aff; }
+  .stats { padding: 16px 32px; display: flex; gap: 16px; flex-wrap: wrap; }
+  .stat-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 12px 20px; display: flex; flex-direction: column; gap: 2px; min-width: 120px; }
+  .stat-value { font-size: 22px; font-weight: 700; color: #172b4d; }
+  .stat-label { font-size: 11px; color: #6b778c; text-transform: uppercase; letter-spacing: 0.05em; }
+  .main { padding: 0 32px 40px; }
+  .project-group { margin-bottom: 28px; }
+  .project-header { display: flex; align-items: center; gap: 12px; padding: 12px 0 8px; border-bottom: 2px solid #e0e0e0; margin-bottom: 12px; cursor: pointer; user-select: none; }
+  .project-header:hover .project-title { color: #0052cc; }
+  .collapse-icon { font-size: 12px; color: #6b778c; transition: transform 0.2s; }
+  .collapsed .collapse-icon { transform: rotate(-90deg); }
+  .project-title { font-size: 16px; font-weight: 700; color: #172b4d; flex: 1; }
+  .project-meta { display: flex; align-items: center; gap: 8px; }
+  .msg-count { background: #e6f0ff; color: #0052cc; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+  .project-link { font-size: 12px; color: #0052cc; text-decoration: none; display: flex; align-items: center; gap: 4px; padding: 4px 10px; border: 1px solid #0052cc; border-radius: 5px; transition: background 0.15s; }
+  .project-link:hover { background: #e6f0ff; }
+  .messages-container { display: flex; flex-direction: column; gap: 10px; }
+  .messages-container.collapsed { display: none; }
+  .msg-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px 20px; transition: box-shadow 0.15s, border-color 0.15s; }
+  .msg-card:hover { border-color: #c0c8d8; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .msg-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; flex-shrink: 0; }
+  .author-info { flex: 1; min-width: 0; }
+  .author-name { font-size: 13px; font-weight: 600; color: #172b4d; }
+  .msg-date { font-size: 12px; color: #6b778c; }
+  .status-badge { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .status-active    { background: #e3fcef; color: #006644; }
+  .status-review    { background: #e6f0ff; color: #0052cc; }
+  .status-progress  { background: #fff7d6; color: #974f0c; }
+  .status-done      { background: #e3fcef; color: #006644; }
+  .status-notstarted{ background: #f4f5f7; color: #6b778c; }
+  .status-onhold    { background: #ffebe6; color: #bf2600; }
+  .status-default   { background: #f4f5f7; color: #6b778c; }
+  .msg-body { font-size: 14px; line-height: 1.65; color: #172b4d; border-top: 1px solid #f0f1f3; padding-top: 10px; }
+  .msg-body p { margin-bottom: 8px; }
+  .msg-body p:last-child { margin-bottom: 0; }
+  .msg-body ul, .msg-body ol { padding-left: 20px; margin-bottom: 8px; }
+  .msg-body li { margin-bottom: 4px; }
+  .msg-body strong { font-weight: 600; }
+  .msg-body a { color: #0052cc; text-decoration: none; }
+  .msg-body a:hover { text-decoration: underline; }
+  .msg-body h1, .msg-body h2 { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+  .msg-body blockquote { border-left: 3px solid #dfe1e6; padding-left: 12px; color: #6b778c; margin: 8px 0; font-style: italic; }
+  .msg-body img { display: none; }
+  .date-sep { font-size: 11px; font-weight: 600; color: #6b778c; text-transform: uppercase; letter-spacing: 0.06em; padding: 4px 0 4px 4px; margin-top: 4px; }
+  .loading, .empty { text-align: center; padding: 60px 20px; color: #6b778c; font-size: 15px; }
+  .spinner { width: 32px; height: 32px; border: 3px solid #dfe1e6; border-top-color: #0052cc; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (max-width: 600px) { .topbar { padding: 0 16px; } .controls, .stats, .main { padding-left: 16px; padding-right: 16px; } .project-link span { display: none; } }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo">DB</div>
+    <h1>Visual Media — Messaging Board</h1>
+  </div>
+  <span class="last-updated" id="lastUpdated"></span>
+</div>
+
+<div class="controls">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="Search messages…" oninput="filterAndRender()">
+  </div>
+  <div class="filter-group">
+    <span class="filter-label">Project:</span>
+    <select id="projectFilter" onchange="filterAndRender()"><option value="">All Projects</option></select>
+  </div>
+  <div class="filter-group">
+    <span class="filter-label">Author:</span>
+    <select id="authorFilter" onchange="filterAndRender()"><option value="">All Authors</option></select>
+  </div>
+  <div class="filter-group">
+    <span class="filter-label">Status:</span>
+    <select id="statusFilter" onchange="filterAndRender()"><option value="">All Statuses</option></select>
+  </div>
+</div>
+
+<div class="stats" id="statsRow" style="display:none">
+  <div class="stat-card"><div class="stat-value" id="statMsgs">0</div><div class="stat-label">Messages</div></div>
+  <div class="stat-card"><div class="stat-value" id="statProjects">0</div><div class="stat-label">Projects</div></div>
+  <div class="stat-card"><div class="stat-value" id="statAuthors">0</div><div class="stat-label">Authors</div></div>
+  <div class="stat-card"><div class="stat-value" id="statLatest">—</div><div class="stat-label">Latest Update</div></div>
+</div>
+
+<div class="main" id="mainContent">
+  <div class="loading"><div class="spinner"></div>Loading messages…</div>
+</div>
+
+<script>
 const SUPABASE_URL = 'https://owjyauqgzccbmgefdluu.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_GL0iUfkeH2P9uKfWqH2xfg_2trE4sHD';
+
+let allMessages = [];
+const avatarColors = {};
+const colorPool = ['#e63946','#2a9d8f','#e76f51','#457b9d','#6a4c93','#1d3557','#f4a261','#2d6a4f'];
+let colorIdx = 0;
+
+function getAvatarColor(name) {
+  if (!avatarColors[name]) avatarColors[name] = colorPool[colorIdx++ % colorPool.length];
+  return avatarColors[name];
+}
+function initials(name) {
+  if (!name) return '?';
+  return name.split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
+}
+function statusClass(status) {
+  if (!status) return 'status-default';
+  const s = status.toLowerCase();
+  if (s.includes('active')) return 'status-active';
+  if (s.includes('review')) return 'status-review';
+  if (s.includes('progress')) return 'status-progress';
+  if (s.includes('done') || s.includes('complete')) return 'status-done';
+  if (s.includes('not started')) return 'status-notstarted';
+  if (s.includes('hold')) return 'status-onhold';
+  return 'status-default';
+}
+function formatDate(iso) {
+  if (!iso) return '';
+  return new Date(iso).toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' });
+}
+function formatTime(iso) {
+  if (!iso) return '';
+  return new Date(iso).toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
+}
+function shortDate(iso) {
+  if (!iso) return '';
+  return new Date(iso).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+}
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+async function fetchMessages() {
+  const url = `${SUPABASE_URL}/rest/v1/messages?select=*&order=date_posted.desc&limit=1000`;
+  const res = await fetch(url, {
+    headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+  });
+  if (!res.ok) throw new Error('Failed to fetch: ' + res.status);
+  return await res.json();
+}
+function populateFilters(messages) {
+  const projects = [...new Set(messages.map(m => m.item_name).filter(Boolean))].sort();
+  const authors  = [...new Set(messages.map(m => m.author).filter(Boolean))].sort();
+  const statuses = [...new Set(messages.map(m => m.item_status).filter(Boolean))].sort();
+  const pf = document.getElementById('projectFilter');
+  projects.forEach(p => { const o = document.createElement('option'); o.value = p; o.textContent = p; pf.appendChild(o); });
+  const af = document.getElementById('authorFilter');
+  authors.forEach(a => { const o = document.createElement('option'); o.value = a; o.textContent = a; af.appendChild(o); });
+  const sf = document.getElementById('statusFilter');
+  statuses.forEach(s => { const o = document.createElement('option'); o.value = s; o.textContent = s; sf.appendChild(o); });
+}
+function filterAndRender() {
+  const search  = document.getElementById('searchInput').value.toLowerCase();
+  const project = document.getElementById('projectFilter').value;
+  const author  = document.getElementById('authorFilter').value;
+  const status  = document.getElementById('statusFilter').value;
+  let filtered = allMessages.filter(m => {
+    if (project && m.item_name !== project) return false;
+    if (author  && m.author !== author) return false;
+    if (status  && m.item_status !== status) return false;
+    if (search) {
+      const body = (m.message || '').toLowerCase();
+      const name = (m.item_name || '').toLowerCase();
+      const auth = (m.author || '').toLowerCase();
+      if (!body.includes(search) && !name.includes(search) && !auth.includes(search)) return false;
+    }
+    return true;
+  });
+  updateStats(filtered);
+  renderGroups(filtered);
+}
+function updateStats(messages) {
+  document.getElementById('statsRow').style.display = 'flex';
+  document.getElementById('statMsgs').textContent = messages.length;
+  document.getElementById('statProjects').textContent = new Set(messages.map(m => m.item_name)).size;
+  document.getElementById('statAuthors').textContent  = new Set(messages.map(m => m.author)).size;
+  document.getElementById('statLatest').textContent = messages[0] ? shortDate(messages[0].date_posted) : '—';
+}
+function renderGroups(messages) {
+  const container = document.getElementById('mainContent');
+  if (messages.length === 0) { container.innerHTML = '<div class="empty">No messages found.</div>'; return; }
+  const groups = {};
+  const groupOrder = [];
+  messages.forEach(m => {
+    if (!groups[m.item_name]) { groups[m.item_name] = []; groupOrder.push(m.item_name); }
+    groups[m.item_name].push(m);
+  });
+  let html = '';
+  groupOrder.forEach(name => {
+    const msgs = groups[name];
+    const sampleUrl = msgs[0].item_url || '#';
+    const count = msgs.length;
+    html += `<div class="project-group">
+      <div class="project-header" onclick="toggleGroup(this)">
+        <span class="collapse-icon">▼</span>
+        <span class="project-title">${escHtml(name)}</span>
+        <div class="project-meta">
+          <span class="msg-count">${count} message${count !== 1 ? 's' : ''}</span>
+          <a class="project-link" href="${sampleUrl}" target="_blank" onclick="event.stopPropagation()">↗ <span>Open in monday.com</span></a>
+        </div>
+      </div>
+      <div class="messages-container">`;
+    let lastDate = null;
+    msgs.forEach(m => {
+      const msgDate = m.date_posted ? m.date_posted.split('T')[0] : null;
+      if (msgDate && msgDate !== lastDate) { html += `<div class="date-sep">${formatDate(m.date_posted)}</div>`; lastDate = msgDate; }
+      const color = getAvatarColor(m.author || '?');
+      const sBadge = m.item_status ? `<span class="status-badge ${statusClass(m.item_status)}">${escHtml(m.item_status)}</span>` : '';
+      html += `<div class="msg-card">
+        <div class="msg-header">
+          <div class="avatar" style="background:${color}">${initials(m.author)}</div>
+          <div class="author-info">
+            <div class="author-name">${escHtml(m.author || 'Unknown')}</div>
+            <div class="msg-date">${formatTime(m.date_posted)}</div>
+          </div>
+          ${sBadge}
+        </div>
+        <div class="msg-body">${m.message || ''}</div>
+      </div>`;
+    });
+    html += `</div></div>`;
+  });
+  container.innerHTML = html;
+}
+function toggleGroup(header) {
+  const group = header.parentElement;
+  const msgs  = group.querySelector('.messages-container');
+  const collapsed = msgs.classList.toggle('collapsed');
+  header.classList.toggle('collapsed', collapsed);
+}
+(async () => {
+  try {
+    allMessages = await fetchMessages();
+    if (!Array.isArray(allMessages) || allMessages.length === 0) {
+      document.getElementById('mainContent').innerHTML = '<div class="empty">No messages found in database.</div>';
+      return;
+    }
+    allMessages.sort((a,b) => new Date(b.date_posted) - new Date(a.date_posted));
+    document.getElementById('lastUpdated').textContent = `Last loaded: ${new Date().toLocaleTimeString('en-US', {hour:'numeric',minute:'2-digit'})}`;
+    populateFilters(allMessages);
+    filterAndRender();
+  } catch(err) {
+    document.getElementById('mainContent').innerHTML = `<div class="empty">Error loading data: ${err.message}<br><br>Check your Supabase credentials in the code.</div>`;
+  }
+})();
+</script>
+</body>
+</html>
