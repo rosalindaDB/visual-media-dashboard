@@ -37,16 +37,12 @@
   .msg-count { background: #e6f0ff; color: #0052cc; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
   .project-link { font-size: 12px; color: #0052cc; text-decoration: none; display: flex; align-items: center; gap: 4px; padding: 4px 10px; border: 1px solid #0052cc; border-radius: 5px; transition: background 0.15s; white-space: nowrap; }
   .project-link:hover { background: #e6f0ff; }
-
-  /* LATEST UPDATE PREVIEW */
   .latest-preview { flex: 2; min-width: 0; display: flex; align-items: center; gap: 8px; overflow: hidden; }
   .latest-author-chip { font-size: 11px; font-weight: 600; color: #fff; padding: 2px 8px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
   .latest-text { font-size: 12px; color: #6b778c; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .latest-date { font-size: 11px; color: #97a0af; white-space: nowrap; flex-shrink: 0; }
-
   .messages-container { display: none; flex-direction: column; gap: 10px; background: #fff; border: 1px solid #e0e0e0; border-top: none; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; padding: 12px 16px 16px; }
   .messages-container.open { display: flex; }
-
   .msg-card { background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 8px; padding: 14px 16px; transition: box-shadow 0.15s, border-color 0.15s; }
   .msg-card:hover { border-color: #c0c8d8; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
   .msg-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
@@ -78,8 +74,6 @@
   .spinner { width: 32px; height: 32px; border: 3px solid #dfe1e6; border-top-color: #0052cc; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
   @keyframes spin { to { transform: rotate(360deg); } }
   @media (max-width: 700px) { .topbar { padding: 0 16px; } .controls, .stats, .main { padding-left: 16px; padding-right: 16px; } .project-link span { display: none; } .latest-preview { display: none; } }
-
-  /* LOGIN */
   #loginGate { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #f4f5f7; position: fixed; top: 0; left: 0; width: 100%; z-index: 9999; }
   .login-box { background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; padding: 40px; width: 100%; max-width: 360px; text-align: center; }
   .login-logo { width: 48px; height: 48px; border-radius: 10px; background: linear-gradient(135deg, #e63946, #f4a261); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 18px; margin: 0 auto 16px; }
@@ -154,6 +148,7 @@
 const SUPABASE_URL = 'https://owjyauqgzccbmgefdluu.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_GL0iUfkeH2P9uKfWqH2xfg_2trE4sHD';
 const PASSWORD = 'wLmPS98nB6qrwX';
+const SESSION_KEY = 'vmb_auth';
 
 let allMessages = [];
 const avatarColors = {};
@@ -163,6 +158,7 @@ let colorIdx = 0;
 function checkPassword() {
   const input = document.getElementById('passwordInput').value;
   if (input === PASSWORD) {
+    sessionStorage.setItem(SESSION_KEY, 'true');
     document.getElementById('loginGate').style.display = 'none';
     init();
   } else {
@@ -268,14 +264,12 @@ function updateStats(messages) {
 function renderGroups(messages) {
   const container = document.getElementById('mainContent');
   if (messages.length === 0) { container.innerHTML = '<div class="empty">No messages found.</div>'; return; }
-
   const groups = {};
   const groupOrder = [];
   messages.forEach(m => {
     if (!groups[m.item_name]) { groups[m.item_name] = []; groupOrder.push(m.item_name); }
     groups[m.item_name].push(m);
   });
-
   let html = '';
   groupOrder.forEach(name => {
     const msgs = groups[name];
@@ -285,7 +279,6 @@ function renderGroups(messages) {
     const latestColor = getAvatarColor(latest.author || '?');
     const latestText = stripHtml(latest.message || '').substring(0, 80) + (stripHtml(latest.message || '').length > 80 ? '…' : '');
     const latestDate = latest.date_posted ? shortDate(latest.date_posted) : '';
-
     html += `<div class="project-group">
       <div class="project-header" onclick="toggleGroup(this)">
         <span class="collapse-icon">▶</span>
@@ -301,14 +294,10 @@ function renderGroups(messages) {
         </div>
       </div>
       <div class="messages-container">`;
-
     let lastDate = null;
     msgs.forEach(m => {
       const msgDate = m.date_posted ? m.date_posted.split('T')[0] : null;
-      if (msgDate && msgDate !== lastDate) {
-        html += `<div class="date-sep">${formatDate(m.date_posted)}</div>`;
-        lastDate = msgDate;
-      }
+      if (msgDate && msgDate !== lastDate) { html += `<div class="date-sep">${formatDate(m.date_posted)}</div>`; lastDate = msgDate; }
       const color = getAvatarColor(m.author || '?');
       const sBadge = m.item_status ? `<span class="status-badge ${statusClass(m.item_status)}">${escHtml(m.item_status)}</span>` : '';
       html += `<div class="msg-card">
@@ -349,6 +338,12 @@ async function init() {
   } catch(err) {
     document.getElementById('mainContent').innerHTML = `<div class="empty">Error loading data: ${err.message}</div>`;
   }
+}
+
+// Auto-login if session already authenticated
+if (sessionStorage.getItem(SESSION_KEY) === 'true') {
+  document.getElementById('loginGate').style.display = 'none';
+  init();
 }
 </script>
 </body>
