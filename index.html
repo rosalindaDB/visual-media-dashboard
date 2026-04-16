@@ -26,22 +26,31 @@
   .stat-value { font-size: 22px; font-weight: 700; color: #172b4d; }
   .stat-label { font-size: 11px; color: #6b778c; text-transform: uppercase; letter-spacing: 0.05em; }
   .main { padding: 0 32px 40px; }
-  .project-group { margin-bottom: 28px; }
-  .project-header { display: flex; align-items: center; gap: 12px; padding: 12px 0 8px; border-bottom: 2px solid #e0e0e0; margin-bottom: 12px; cursor: pointer; user-select: none; }
-  .project-header:hover .project-title { color: #0052cc; }
-  .collapse-icon { font-size: 12px; color: #6b778c; transition: transform 0.2s; }
-  .project-header.collapsed .collapse-icon { transform: rotate(-90deg); }
-  .project-title { font-size: 16px; font-weight: 700; color: #172b4d; flex: 1; }
-  .project-meta { display: flex; align-items: center; gap: 8px; }
-  .msg-count { background: #e6f0ff; color: #0052cc; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
-  .project-link { font-size: 12px; color: #0052cc; text-decoration: none; display: flex; align-items: center; gap: 4px; padding: 4px 10px; border: 1px solid #0052cc; border-radius: 5px; transition: background 0.15s; }
+  .project-group { margin-bottom: 20px; }
+  .project-header { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; cursor: pointer; user-select: none; transition: border-color 0.15s; }
+  .project-header:hover { border-color: #c0c8d8; }
+  .project-header.open { border-bottom-left-radius: 0; border-bottom-right-radius: 0; border-bottom-color: #f0f1f3; }
+  .collapse-icon { font-size: 11px; color: #6b778c; transition: transform 0.2s; flex-shrink: 0; }
+  .project-header.open .collapse-icon { transform: rotate(90deg); }
+  .project-title { font-size: 15px; font-weight: 700; color: #172b4d; flex: 1; }
+  .project-meta { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .msg-count { background: #e6f0ff; color: #0052cc; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
+  .project-link { font-size: 12px; color: #0052cc; text-decoration: none; display: flex; align-items: center; gap: 4px; padding: 4px 10px; border: 1px solid #0052cc; border-radius: 5px; transition: background 0.15s; white-space: nowrap; }
   .project-link:hover { background: #e6f0ff; }
-  .messages-container { display: flex; flex-direction: column; gap: 10px; }
-  .messages-container.collapsed { display: none; }
-  .msg-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px 20px; transition: box-shadow 0.15s, border-color 0.15s; }
+
+  /* LATEST UPDATE PREVIEW */
+  .latest-preview { flex: 2; min-width: 0; display: flex; align-items: center; gap: 8px; overflow: hidden; }
+  .latest-author-chip { font-size: 11px; font-weight: 600; color: #fff; padding: 2px 8px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
+  .latest-text { font-size: 12px; color: #6b778c; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .latest-date { font-size: 11px; color: #97a0af; white-space: nowrap; flex-shrink: 0; }
+
+  .messages-container { display: none; flex-direction: column; gap: 10px; background: #fff; border: 1px solid #e0e0e0; border-top: none; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; padding: 12px 16px 16px; }
+  .messages-container.open { display: flex; }
+
+  .msg-card { background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 8px; padding: 14px 16px; transition: box-shadow 0.15s, border-color 0.15s; }
   .msg-card:hover { border-color: #c0c8d8; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
   .msg-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
-  .avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; flex-shrink: 0; }
+  .avatar { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0; }
   .author-info { flex: 1; min-width: 0; }
   .author-name { font-size: 13px; font-weight: 600; color: #172b4d; }
   .msg-date { font-size: 12px; color: #6b778c; }
@@ -53,7 +62,7 @@
   .status-notstarted{ background: #f4f5f7; color: #6b778c; }
   .status-onhold    { background: #ffebe6; color: #bf2600; }
   .status-default   { background: #f4f5f7; color: #6b778c; }
-  .msg-body { font-size: 14px; line-height: 1.65; color: #172b4d; border-top: 1px solid #f0f1f3; padding-top: 10px; }
+  .msg-body { font-size: 14px; line-height: 1.65; color: #172b4d; border-top: 1px solid #e8e9eb; padding-top: 10px; }
   .msg-body p { margin-bottom: 8px; }
   .msg-body p:last-child { margin-bottom: 0; }
   .msg-body ul, .msg-body ol { padding-left: 20px; margin-bottom: 8px; }
@@ -64,13 +73,13 @@
   .msg-body h1, .msg-body h2 { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
   .msg-body blockquote { border-left: 3px solid #dfe1e6; padding-left: 12px; color: #6b778c; margin: 8px 0; font-style: italic; }
   .msg-body img { display: none; }
-  .date-sep { font-size: 11px; font-weight: 600; color: #6b778c; text-transform: uppercase; letter-spacing: 0.06em; padding: 4px 0 4px 4px; margin-top: 4px; }
+  .date-sep { font-size: 11px; font-weight: 600; color: #97a0af; text-transform: uppercase; letter-spacing: 0.06em; padding: 6px 0 4px 2px; margin-top: 4px; }
   .loading, .empty { text-align: center; padding: 60px 20px; color: #6b778c; font-size: 15px; }
   .spinner { width: 32px; height: 32px; border: 3px solid #dfe1e6; border-top-color: #0052cc; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  @media (max-width: 600px) { .topbar { padding: 0 16px; } .controls, .stats, .main { padding-left: 16px; padding-right: 16px; } .project-link span { display: none; } }
+  @media (max-width: 700px) { .topbar { padding: 0 16px; } .controls, .stats, .main { padding-left: 16px; padding-right: 16px; } .project-link span { display: none; } .latest-preview { display: none; } }
 
-  /* LOGIN GATE */
+  /* LOGIN */
   #loginGate { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #f4f5f7; position: fixed; top: 0; left: 0; width: 100%; z-index: 9999; }
   .login-box { background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; padding: 40px; width: 100%; max-width: 360px; text-align: center; }
   .login-logo { width: 48px; height: 48px; border-radius: 10px; background: linear-gradient(135deg, #e63946, #f4a261); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 18px; margin: 0 auto 16px; }
@@ -85,7 +94,6 @@
 </head>
 <body>
 
-<!-- LOGIN GATE -->
 <div id="loginGate">
   <div class="login-box">
     <div class="login-logo">DB</div>
@@ -97,7 +105,6 @@
   </div>
 </div>
 
-<!-- TOP BAR -->
 <div class="topbar">
   <div class="topbar-left">
     <div class="logo">DB</div>
@@ -106,7 +113,6 @@
   <span class="last-updated" id="lastUpdated"></span>
 </div>
 
-<!-- CONTROLS -->
 <div class="controls">
   <div class="search-wrap">
     <span class="search-icon">🔍</span>
@@ -133,7 +139,6 @@
   </div>
 </div>
 
-<!-- STATS -->
 <div class="stats" id="statsRow" style="display:none">
   <div class="stat-card"><div class="stat-value" id="statMsgs">0</div><div class="stat-label">Messages</div></div>
   <div class="stat-card"><div class="stat-value" id="statProjects">0</div><div class="stat-label">Projects</div></div>
@@ -141,7 +146,6 @@
   <div class="stat-card"><div class="stat-value" id="statLatest">—</div><div class="stat-label">Latest Update</div></div>
 </div>
 
-<!-- MAIN -->
 <div class="main" id="mainContent">
   <div class="loading"><div class="spinner"></div>Loading messages…</div>
 </div>
@@ -198,6 +202,10 @@ function formatTime(iso) {
 function shortDate(iso) {
   if (!iso) return '';
   return new Date(iso).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+}
+function stripHtml(html) {
+  if (!html) return '';
+  return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 }
 function escHtml(str) {
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -260,31 +268,47 @@ function updateStats(messages) {
 function renderGroups(messages) {
   const container = document.getElementById('mainContent');
   if (messages.length === 0) { container.innerHTML = '<div class="empty">No messages found.</div>'; return; }
+
   const groups = {};
   const groupOrder = [];
   messages.forEach(m => {
     if (!groups[m.item_name]) { groups[m.item_name] = []; groupOrder.push(m.item_name); }
     groups[m.item_name].push(m);
   });
+
   let html = '';
   groupOrder.forEach(name => {
     const msgs = groups[name];
     const sampleUrl = msgs[0].item_url || '#';
     const count = msgs.length;
+    const latest = msgs[0];
+    const latestColor = getAvatarColor(latest.author || '?');
+    const latestText = stripHtml(latest.message || '').substring(0, 80) + (stripHtml(latest.message || '').length > 80 ? '…' : '');
+    const latestDate = latest.date_posted ? shortDate(latest.date_posted) : '';
+
     html += `<div class="project-group">
-      <div class="project-header collapsed" onclick="toggleGroup(this)">
-        <span class="collapse-icon">▼</span>
+      <div class="project-header" onclick="toggleGroup(this)">
+        <span class="collapse-icon">▶</span>
         <span class="project-title">${escHtml(name)}</span>
+        <div class="latest-preview">
+          <span class="latest-author-chip" style="background:${latestColor}">${initials(latest.author)}</span>
+          <span class="latest-text">${escHtml(latestText)}</span>
+          <span class="latest-date">${latestDate}</span>
+        </div>
         <div class="project-meta">
-          <span class="msg-count">${count} message${count !== 1 ? 's' : ''}</span>
-          <a class="project-link" href="${sampleUrl}" target="_blank" onclick="event.stopPropagation()">↗ <span>Open in monday.com</span></a>
+          <span class="msg-count">${count} msg${count !== 1 ? 's' : ''}</span>
+          <a class="project-link" href="${sampleUrl}" target="_blank" onclick="event.stopPropagation()">↗ <span>monday.com</span></a>
         </div>
       </div>
-      <div class="messages-container collapsed">`;
+      <div class="messages-container">`;
+
     let lastDate = null;
     msgs.forEach(m => {
       const msgDate = m.date_posted ? m.date_posted.split('T')[0] : null;
-      if (msgDate && msgDate !== lastDate) { html += `<div class="date-sep">${formatDate(m.date_posted)}</div>`; lastDate = msgDate; }
+      if (msgDate && msgDate !== lastDate) {
+        html += `<div class="date-sep">${formatDate(m.date_posted)}</div>`;
+        lastDate = msgDate;
+      }
       const color = getAvatarColor(m.author || '?');
       const sBadge = m.item_status ? `<span class="status-badge ${statusClass(m.item_status)}">${escHtml(m.item_status)}</span>` : '';
       html += `<div class="msg-card">
@@ -307,8 +331,8 @@ function renderGroups(messages) {
 function toggleGroup(header) {
   const group = header.parentElement;
   const msgs = group.querySelector('.messages-container');
-  const isCollapsed = msgs.classList.toggle('collapsed');
-  header.classList.toggle('collapsed', isCollapsed);
+  const isOpen = msgs.classList.toggle('open');
+  header.classList.toggle('open', isOpen);
 }
 
 async function init() {
