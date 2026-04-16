@@ -230,7 +230,7 @@ function renderGroups(messages) {
           <a class="project-link" href="${sampleUrl}" target="_blank" onclick="event.stopPropagation()">↗ <span>Open in monday.com</span></a>
         </div>
       </div>
-      <div class="messages-container">`;
+      <div class="messages-container collapsed">`;
     let lastDate = null;
     msgs.forEach(m => {
       const msgDate = m.date_posted ? m.date_posted.split('T')[0] : null;
